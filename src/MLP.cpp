@@ -1,7 +1,6 @@
 #include "MLP.h"
 
 void FullyConnectedLayer(const int8_t A[], const Vec_t B[], Vec_t C[], const int8_t bias[], const int8_t scale, int K, int N, int M, int D, int W, bool relu){
-#pragma HLS INLINE
 
 	for (int n = 0; n < N / D; ++n) {
 	#pragma HLS LOOP_TRIPCOUNT min = 1 max = 1
@@ -65,7 +64,13 @@ void MultilayerPerceptron(const int8_t im[], int8_t out[]) {
 	int8_t data2[256];
 	int8_t data3[16];
 
-	for(int i = 0; i<10000; ++i){
+	int n_images = 10000;
+
+	#ifndef __SYNTHESIS__
+	n_images = 1;
+	#endif
+
+	for(int i = 0; i<n_images; ++i){
 		FullyConnectedLayer(im+784*i, reinterpret_cast<Vec_t const *>(weights1), reinterpret_cast<Vec_t *>(data1), bias+bias_offset[0], scales[0], network_info[0], 1, network_info[1], 1, network_info[1], true);
 		#ifndef __SYNTHESIS__
 		for(int i = 0; i<128; ++i){
