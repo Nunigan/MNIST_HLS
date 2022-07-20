@@ -90,118 +90,7 @@ class utils():
         self.res_mnist = data
         return self.weights, self.bias, self.layer_data, 
 
-
-    def NN_int_quant(self):
-
-        num_classes = 10
-        input_shape = (784, 1)
-          
-        # the data, split between train and test sets
-        (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
-          
-        x_test = x_test.reshape(10000, 784)
-        x_train = x_train.reshape(60000, 784)
-        # Scale images t the [0, 1] range
-        x_train = x_train.astype("float32") / 255
-        x_test = x_test.astype("float32") / 255
-        # Make sure images have shape (28, 28, 1)
-        x_train = np.expand_dims(x_train, -1)
-        x_test = np.expand_dims(x_test, -1)
-          
-        # convert class vectors to binary class matrices
-        y_train = tf.keras.utils.to_categorical(y_train, num_classes)
-        y_test = tf.keras.utils.to_categorical(y_test, num_classes)
-
-
-        model = tf.keras.models.load_model('mnist.h5')
-
-        converter = tf.lite.TFLiteConverter.from_keras_model(model)
-        converter.inference_input_type = tf.uint8  # or tf.uint8
-        converter.inference_output_type = tf.int8  # or tf.uint8
-
-        # We set the following converter options to ensure our model is fully quantized.
-        # An error should get thrown if there is any ops that can't be quantized.
-        converter.optimizations = [tf.lite.Optimize.DEFAULT]
-        converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-        # converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8, tf.lite.OpsSet.SELECT_TF_OPS]
-
-        converter.experimental_new_converter=True
-        converter.experimental_new_quantizer=True
-        converter.allow_custom_ops = True
-        # To use post training quantization we must provide some sample data that will be used to
-        # calculate activation ranges for quantization. This data should be representative of the data
-        # we expect to feed the model and must be provided by a generator function.
-        def generate_repr_dataset():
-            for i in range(100):  # 100 samples is all we should need in this example.
-                yield [np.expand_dims(x_test[i], axis=0)]
-
-        converter.representative_dataset = generate_repr_dataset
-        tflite_model = converter.convert()
-
-        interpreter = tf.lite.Interpreter(model_content=tflite_model)
-
-        interpreter.allocate_tensors()
-        input_details = interpreter.get_input_details()
-        output_details = interpreter.get_output_details()
-
-        n_test=1
-        accuracy_count = 0
-        num_test_images = n_test
-
-        data = (x_test*255).astype("uint8")
-
-        for i in range(n_test):
-            interpreter.set_tensor(input_details[0]['index'], data[i][np.newaxis, ...].astype(np.uint8))
-            interpreter.invoke()
-            output_data = interpreter.get_tensor(output_details[0]['index'])
-            if np.argmax(output_data) == np.argmax(y_test[i]):
-                accuracy_count += 1
-
-            print(output_data)
-        print(f"Test accuracy quantized: {accuracy_count / num_test_images:.3f}")
-
-
-        tensor_details = interpreter.get_tensor_details()
-        tens = []
-        scal = []
-        zero_p = []
-        for dict in tensor_details:
-            i = dict['index']
-            shape = dict['shape']
-            shape_signature = dict['shape_signature']
-            dtype = dict['dtype']
-            
-            tensor_name = dict['name']
-            scales = dict['quantization_parameters']['scales']
-            zero_points = dict['quantization_parameters']['zero_points']
-            q_dims = dict['quantization_parameters']['quantized_dimension']
-            sparsity_parameters = dict['sparsity_parameters']
-            tensor = interpreter.tensor(i)()
-
-            print(i, type, tensor_name, scales.shape, zero_points.shape, tensor.shape, shape, shape_signature, q_dims, sparsity_parameters)
-            tens.append(tensor)
-            scal.append(scales)
-            zero_p.append(zero_points)
-            
-            
-        im = tens[0][0,:,0] 
-             
-        return tens, scal, zero_p
-
-    def conv(self, input, kernel):
-        input = np.reshape(input, (28,28)).astype('float32')
-        self.conv_out = signal.convolve2d(input, kernel, mode='valid').astype("int32")
-        self.kernel = kernel
-
-    def MM(self, input, dim):
-        self.mm_dim = dim
-        self.weights_vec = np.random.randint(-2, 2, size = (dim, self.mnist_dim**2))
-        print(self.weights_vec)
-        # np.savetxt("weights.txt",  self.weights_vec.astype(np.int8), fmt='%i')
-        self.mm_out = self.weights_vec@input
-
-
-    def write_mnist(self):
+     def write_mnist(self):
         
         self.weights_int[0] = np.pad(self.weights_int[0], ((0,0),(0,128)))
         self.weights_int[2] = np.pad(self.weights_int[2], ((0,0),(0,246)))
@@ -357,10 +246,8 @@ class utils():
             file.writelines('};\n')
             file.writelines('\n')
 
-
-
-
     def rename(self):
+        # Function to rename files after Vitis AI dump_model()
 
         for i, path in enumerate(sorted(glob.glob('dump_results/dump_results_0/*.txt'))):
             filename = (os.path.basename(path))
@@ -376,7 +263,7 @@ class utils():
                 filename = filename[:12] + "0_" + filename[12:]
                 os.rename(path, 'dump_results/dump_results_weights/' + filename)
 
-    def FullyVitis(self):
+    def FullyVitisAI(self):
 
         bias = []
         weight = []
@@ -420,6 +307,8 @@ class utils():
                 err +=1
         print("acc {}".format(1-err/10000))
         
+        # Check if still in range of int16
+
         mins= []
         maxs = []
         for i in range(30000):
@@ -440,7 +329,7 @@ class utils():
 
 
     def pynq_dpu(self):
-        
+        # use only in Vitis AI
         from tensorflow_model_optimization.quantization.keras import vitis_quantize
         
         num_classes = 10
@@ -507,18 +396,11 @@ if __name__ == '__main__':
 
     utils_obj = utils('cpp/')
 
-
-    # utils_obj.conv(utils_obj.x_test[0], np.array([[1,1,1],[1,2,1],[1,1,1]]))
-    # utils_obj.MM(utils_obj.x_test[0], 16)
-
-    # utils_obj.write_c_im_array(1, True, False)
-
     w, b, data = utils_obj.NN(True)
-    # tens, scal, zero_p = utils_obj.NN_int_quant()
     # utils_obj.write_mnist()
 
     # utils_obj.rename()
-    # out, b, w, test = utils_obj.FullyVitis()
+    # out, b, w, test = utils_obj.FullyVitisAI()
     # utils_obj.write_mnist()
     # print(out[2])
     # utils_obj.pynq_dpu()
