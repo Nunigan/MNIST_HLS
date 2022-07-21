@@ -75,7 +75,7 @@ void MultilayerPerceptron(const int8_t im[], int8_t out[]) {
 		#ifndef __SYNTHESIS__
 		for(int i = 0; i<128; ++i){
 		 	if(data1[i]-res_layers[i] != 0)
-		 		printf("Wrong result layer 3, pos %d: res = %d, correct = %d \n", i,data1[i], res_layers[i]);
+		 		printf("Wrong result layer 1, pos %d: res = %d, correct = %d \n", i,data1[i], res_layers[i]);
 		}
 		#endif
 
@@ -83,7 +83,7 @@ void MultilayerPerceptron(const int8_t im[], int8_t out[]) {
 		#ifndef __SYNTHESIS__
 		for(int i = 0; i<256; ++i){
 		 	if(data2[i]-res_layers[i+128] != 0)
-		 		printf("Wrong result layer 3, pos %d: res = %d, correct = %d \n", i,data2[i], res_layers[i+128]);
+		 		printf("Wrong result layer 2, pos %d: res = %d, correct = %d \n", i,data2[i], res_layers[i+128]);
 		 }
 		#endif
 

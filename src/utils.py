@@ -36,9 +36,6 @@ class utils():
         # Scale images t the [0, 1] range
         x_train = x_train.astype("float32") / 255
         x_test = x_test.astype("float32") / 255
-        # Make sure images have shape (28, 28, 1)
-        x_train = np.expand_dims(x_train, -1)
-        x_test = np.expand_dims(x_test, -1)
 
         # convert class vectors to binary class matrices
         y_train = tf.keras.utils.to_categorical(y_train, num_classes)
@@ -85,18 +82,15 @@ class utils():
                 data[data<0] = 0
             else:
                 pass
-                # data = np.exp(data) / np.sum(np.exp(data))
             self.layer_data.append(data)
         self.res_mnist = data
         return self.weights, self.bias, self.layer_data, 
 
-     def write_mnist(self):
+    def write_mnist(self):
         
         self.weights_int[0] = np.pad(self.weights_int[0], ((0,0),(0,128)))
         self.weights_int[2] = np.pad(self.weights_int[2], ((0,0),(0,246)))
-
-        # self.weights_int[2] = np.pad(self.weights_int[2], ((0,0),(0,6)))
-        
+       
         w = np.array(self.weights_int[0]).flatten()
         b = np.array(self.bias_int[0]).flatten()
         res = np.array(self.out[0]).flatten()
@@ -115,12 +109,9 @@ class utils():
         n_weights2 = np.shape(w2)[0]
         n_weights3 = np.shape(w3)[0]
 
-
         w = w.astype(np.int8)
         b = b.astype(np.int8)
         res = res.astype(np.int8)
-
-
 
         n_weights = np.shape(w)[0]
         n_bias = np.shape(b)[0]
@@ -131,21 +122,6 @@ class utils():
             file.writelines('#include <stdint.h> \n')
             file.writelines('\n')
 
-
-            # file.writelines('static const int8_t weights[{}] = \n'.format(n_weights))
-            # file.writelines('  {')
-             
-            # for j in range(n_weights):
-            #     if j == n_weights -1:
-            #         file.writelines('{}'.format(w[j]))
-            #     else:
-            #         if j % self.mnist_dim == 0:
-            #             file.writelines('\n        {},'.format(w[j]))
-            #         else:
-            #             file.writelines('{},'.format(w[j]))
-            # file.writelines('  };\n')
-            # file.writelines('\n')
-            
             file.writelines('static const int8_t weights1[{}] = \n'.format(n_weights1))
             file.writelines('  {')
              
@@ -270,18 +246,16 @@ class utils():
         data = []
         self.out = []
         test = []
-        # scales = [1024, 256, 1024]
-        scales = [512, 256, 256]
 
+        scales = [512, 256, 256]
+        # number of bitshift for FPGA
         self.log_scales = [9, 8, 8]
 
         layers = [784,128,256,10]
         
         for filename in sorted(glob.glob("dump_results/dump_results_weights/quant_dense_*_bias.txt")):
-        # for filename in sorted(glob.glob("dump_results/dump_results_weights/quant_dense_*_bias_float.txt")):
             bias.append(np.loadtxt(filename))
         for filename in sorted(glob.glob("dump_results/dump_results_weights/quant_dense_*_kernel.txt")):
-        # for filename in sorted(glob.glob("dump_results/dump_results_weights/quant_dense_*_kernel_float.txt")):
             weight.append(np.loadtxt(filename))
             
         for i in range(3):
@@ -294,11 +268,9 @@ class utils():
 
         for i in range(10000):
             data = self.x_test[i]//32
-            # self.out.append(data)
             for j in range(3):
                 test.append(data@weight[j]+bias[j])
                 data = (data@weight[j]+bias[j])//scales[j]
-                # data = (data@weight[j]+bias[j])/scales[j]
                 if j != 2:
                     data = data*(data>0)
                 self.out.append(data)
@@ -307,7 +279,7 @@ class utils():
                 err +=1
         print("acc {}".format(1-err/10000))
         
-        # Check if still in range of int16
+        # Check if still in range of int16 (-32,768 to +32,767)
 
         mins= []
         maxs = []
@@ -353,7 +325,6 @@ class utils():
 
 
         inputs = tf.keras.Input(shape=input_shape)
-        # x = tf.keras.layers.Flatten()(inputs)
         x = tf.keras.layers.Dense(128, activation='relu')(inputs)
         x = tf.keras.layers.Dense(256, activation='relu')(x)
         outputs = tf.keras.layers.Dense(10, activation='softmax')(x)
@@ -402,5 +373,4 @@ if __name__ == '__main__':
     # utils_obj.rename()
     # out, b, w, test = utils_obj.FullyVitisAI()
     # utils_obj.write_mnist()
-    # print(out[2])
     # utils_obj.pynq_dpu()
