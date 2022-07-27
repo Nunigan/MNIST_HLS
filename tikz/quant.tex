@@ -1,0 +1,58 @@
+\documentclass[border=10pt]{standalone}
+\usepackage[left=25mm,right=25mm,top=25mm,bottom=25mm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{lipsum}
+\usepackage{amscd}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{textcomp}
+\usepackage{txfonts}
+\usepackage[all]{xy}
+\usepackage{paralist}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{array}
+\usepackage{tikz}
+\usepackage{slashed}
+\usepackage{pdfpages}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+\usetikzlibrary{shapes.geometric}
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage{color}
+
+\begin{document}
+
+\begin{tikzpicture}
+
+    \node[ellipse, thick,draw,minimum width=2cm,minimum height=1cm] (w) at (1.5,-1) {Weights};
+    \node[ellipse, thick, draw, minimum width=2cm,minimum height=1cm] (i) at (-1.5,-1) {Input};
+    \node [draw, thick,minimum width=2cm,minimum height=1cm] (conv) at (0,2) {Conv};
+    \node [ellipse, thick, draw,minimum width=2cm,minimum height=1cm] (bias) at (-3,4) {Bias};
+    \node [circle,thick, draw,minimum width=1cm,minimum height=1cm] (add) at (0,4) {\huge+};
+    \node [draw,thick,minimum width=2cm,minimum height=1cm] (relu) at (0,6) {ReLU};
+
+    \draw[->, thick](i.90) -- node[anchor=west] {\footnotesize int8} (conv.230);
+    \draw[->, thick](w.90) -- node[anchor=west] {\footnotesize int8} (conv.300);
+    \draw[->, thick](conv.90) -- node[anchor=west] {\footnotesize int32} (add.270);
+    \draw[->, thick](bias.0) -- node[anchor=north] {\footnotesize int32} (add.180);
+    \draw[->, thick](add.90) -- node[anchor=west] {\footnotesize int8} (relu.270);
+    \draw[->, thick](relu.0) -- node[anchor=south] {\footnotesize int8} ++ (1,0) node[anchor=west] {output};
+
+\end{tikzpicture}
+
+
+
+\end{document}
+

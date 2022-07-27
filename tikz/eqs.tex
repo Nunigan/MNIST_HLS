@@ -1,0 +1,67 @@
+\documentclass[border=10pt,varwidth]{standalone}
+\usepackage[left=25mm,right=25mm,top=25mm,bottom=25mm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{lipsum}
+\usepackage{amscd}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{textcomp}
+\usepackage{txfonts}
+\usepackage[all]{xy}
+\usepackage{paralist}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{array}
+\usepackage{tikz}
+\usepackage{slashed}
+\usepackage{pdfpages}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+\usetikzlibrary{shapes.geometric}
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage{color}
+
+\begin{document}
+
+\begin{equation}
+    a_i(l) = \sigma\left( \sum_{j=1}^{n_{l-1}} w_{ij}(l)a_j(l-1) +b_i(l) \right),
+  \end{equation}
+
+\begin{equation}
+    \mathbf{z}(l) = \mathbf{W}(l) \, \mathbf{a}(l-1) + \mathbf{b}(l) \quad\quad\quad\quad \text{where } l= 2,3,\ldots,L,
+\end{equation}
+
+\begin{equation}
+    \mathbf{W}(l)=\left[
+    \begin{array}{cccc}
+       W_{11}(l) &  W_{12}(l) &\cdots &  W_{1n_{l-1}}(l) \\
+       W_{21}(l) &  W_{22}(l) &\cdots &  W_{2n_{l-1}}(l) \\
+       \vdots &  \vdots & \ddots & \vdots \\
+       W_{n_l1}(l) &  W_{n_l2}(l) &\cdots &  W_{n_ln_{l-1}}(l) \\
+    \end{array}
+    \right]
+  \end{equation}
+
+  \begin{equation}
+    \mathbf{a}(l) = \sigma [\mathbf{z}(l)] =
+     \left[  \begin{array}{c}
+       \sigma \left( z_1(l) \right)  \\
+       \sigma \left( z_2(l) \right)  \\
+       \vdots  \\
+       \sigma \left( z_{n_l}(l) \right)  \\
+    \end{array} \right].
+  \end{equation}
+
+\end{document}
+
