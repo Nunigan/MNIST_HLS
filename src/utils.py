@@ -368,7 +368,6 @@ if __name__ == '__main__':
     utils_obj = utils('cpp/')
 
     w, b, data = utils_obj.NN(True)
-    # utils_obj.write_mnist()
 
     # utils_obj.rename()
     # out, b, w, test = utils_obj.FullyVitisAI()
